@@ -1,8 +1,12 @@
-import { promises as fs } from "node:fs"
 import path from "node:path"
 import type { Payment, PaymentStats } from "@/types/payment"
 
-// Path to the JSON data file
+// In-memory storage for Vercel compatibility
+// Note: Data will reset on server restart/deployment
+let paymentsData: Payment[] = []
+let statsData: PaymentStats | null = null
+
+// Path to the JSON data file (kept for local development reference)
 const DATA_DIR = path.join(process.cwd(), "data")
 const PAYMENTS_FILE = path.join(DATA_DIR, "payments.json")
 const STATS_FILE = path.join(DATA_DIR, "stats.json")
@@ -182,6 +186,16 @@ const INITIAL_STATS: PaymentStats = {
   totalPaid: 980000,
 }
 
+// Initialize in-memory data
+function initializeData() {
+  if (paymentsData.length === 0) {
+    paymentsData = [...INITIAL_PAYMENTS]
+  }
+  if (!statsData) {
+    statsData = { ...INITIAL_STATS }
+  }
+}
+
 // Generate unique identification for new payments
 function generateUniqueIdentification(): string {
   const year = new Date().getFullYear()
@@ -190,59 +204,31 @@ function generateUniqueIdentification(): string {
   return `TX-${year}-${String(timestamp).slice(-3)}-${random}`
 }
 
-// Ensure data directory exists
-async function ensureDataDir() {
-  try {
-    await fs.access(DATA_DIR)
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true })
-  }
+// No-op for in-memory storage
+function ensureDataDir() {
+  // Not needed for in-memory storage
 }
 
-// Read payments from JSON file or create initial data
-async function readPayments(): Promise<Payment[]> {
-  await ensureDataDir()
-
-  try {
-    const data = await fs.readFile(PAYMENTS_FILE, "utf-8")
-    const parsed = JSON.parse(data)
-    // Convert date strings back to Date objects
-    return parsed.map((payment: any) => ({
-      ...payment,
-      createdAt: new Date(payment.createdAt),
-      completedAt: new Date(payment.completedAt),
-    }))
-  } catch {
-    // File doesn't exist, create it with initial data
-    await writePayments(INITIAL_PAYMENTS)
-    return INITIAL_PAYMENTS
-  }
+// Read payments from in-memory storage
+function readPayments(): Payment[] {
+  initializeData()
+  return paymentsData
 }
 
-// Write payments to JSON file
-async function writePayments(payments: Payment[]): Promise<void> {
-  await ensureDataDir()
-  await fs.writeFile(PAYMENTS_FILE, JSON.stringify(payments, null, 2))
+// Write payments to in-memory storage
+function writePayments(payments: Payment[]): void {
+  paymentsData = [...payments]
 }
 
-// Read stats from JSON file or create initial data
-async function readStats(): Promise<PaymentStats> {
-  await ensureDataDir()
-
-  try {
-    const data = await fs.readFile(STATS_FILE, "utf-8")
-    return JSON.parse(data)
-  } catch {
-    // File doesn't exist, create it with initial data
-    await writeStats(INITIAL_STATS)
-    return INITIAL_STATS
-  }
+// Read stats from in-memory storage
+function readStats(): PaymentStats {
+  initializeData()
+  return statsData!
 }
 
-// Write stats to JSON file
-async function writeStats(stats: PaymentStats): Promise<void> {
-  await ensureDataDir()
-  await fs.writeFile(STATS_FILE, JSON.stringify(stats, null, 2))
+// Write stats to in-memory storage
+function writeStats(stats: PaymentStats): void {
+  statsData = { ...stats }
 }
 
 class PaymentRepository {
@@ -251,7 +237,7 @@ class PaymentRepository {
    */
   async getPayments(): Promise<Payment[]> {
     await this.delay(300)
-    return await readPayments()
+    return readPayments()
   }
 
   /**
@@ -259,7 +245,7 @@ class PaymentRepository {
    */
   async getPaymentById(id: string): Promise<Payment | null> {
     await this.delay(200)
-    const payments = await readPayments()
+    const payments = readPayments()
     return payments.find((p) => p.id === id) || null
   }
 
@@ -268,7 +254,7 @@ class PaymentRepository {
    */
   async getStats(): Promise<PaymentStats> {
     await this.delay(100)
-    return await readStats()
+    return readStats()
   }
 
   /**
@@ -287,8 +273,8 @@ class PaymentRepository {
       throw new Error("Network error: Could not create payment")
     }
 
-    const payments = await readPayments()
-    const stats = await readStats()
+    const payments = readPayments()
+    const stats = readStats()
 
     // Ensure unique identification
     let identification: string
@@ -328,9 +314,9 @@ class PaymentRepository {
       totalPaid: stats.totalPaid + data.amount,
     }
 
-    // Persist to files
-    await writePayments(updatedPayments)
-    await writeStats(updatedStats)
+    // Persist to in-memory storage
+    writePayments(updatedPayments)
+    writeStats(updatedStats)
 
     return newPayment
   }
@@ -340,7 +326,7 @@ class PaymentRepository {
    */
   async searchPayments(query: string): Promise<Payment[]> {
     await this.delay(200)
-    const payments = await readPayments()
+    const payments = readPayments()
 
     if (!query.trim()) {
       return payments
@@ -367,8 +353,8 @@ class PaymentRepository {
    * Reset data to initial state (useful for testing)
    */
   async reset(): Promise<void> {
-    await writePayments(INITIAL_PAYMENTS)
-    await writeStats(INITIAL_STATS)
+    writePayments(INITIAL_PAYMENTS)
+    writeStats(INITIAL_STATS)
   }
 }
 
