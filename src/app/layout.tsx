@@ -145,11 +145,6 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
-  ],
-  colorScheme: "dark light",
 }
 
 // Structured data for SEO
@@ -227,7 +222,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-slate-100 text-foreground selection:bg-emerald-500/20 selection:text-emerald-300`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-slate-100 text-foreground selection:bg-emerald-700/20 selection:text-slate-800`}
         suppressHydrationWarning
       >
         {/* Skip to main content for accessibility */}
@@ -239,7 +234,7 @@ export default function RootLayout({
         </a>
 
         {/* Main application */}
-        <main id="main-content" className="min-h-screen container mx-auto py-4">
+        <main id="main-content" className="min-h-screen py-4">
           {children}
           <Toaster position="bottom-right" />
         </main>

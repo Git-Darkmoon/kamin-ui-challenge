@@ -137,7 +137,7 @@ export function MobileNav() {
               <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none">
                 <path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z" fill="currentColor" />
               </svg>
-              <span className="text-lg font-semibold">Tu Empresa</span>
+              <span className="text-lg font-semibold">Kamin</span>
             </div>
 
             {/* Navigation Links */}

@@ -1,6 +1,6 @@
 # Kamin Payments Platform
 
-A modern, scalable payment management platform built with Next.js 16, TypeScript, and TailwindCSS.
+A modern, scalable payment management platform built with Next.js 16, TypeScript, and TailwindCSS for Kamin Studio's technical interview challenge.
 
 ## 🚀 Features
 
@@ -8,6 +8,8 @@ A modern, scalable payment management platform built with Next.js 16, TypeScript
 
 - ✅ **Payment List View** - Display payments with filtering and search
 - ✅ **Create Payment Flow** - Modal-based payment creation with validation
+- ✅ **Pagination** - Displays max 6 payments per page with navigation
+- ✅ **Transaction Creation** - Users can create new payments that appear instantly in the list
 - ✅ **Responsive Design** - Mobile-first approach with horizontal scrolling cards
 - ✅ **Real-time Search** - Debounced search with instant results
 - ✅ **State Management** - Server actions with `useActionState`
@@ -16,7 +18,17 @@ A modern, scalable payment management platform built with Next.js 16, TypeScript
 - ✅ **Loading States** - Proper loading indicators and skeletons
 - ✅ **Error Handling** - Comprehensive error boundaries and validation
 
-### Technical Highlights
+### Implementation Details
+
+#### States Implemented:
+
+- **Default State** → Clean form with proper validation
+- **Loading State** → Loading spinner while payment is being created
+- **Success State** → Toast notification and payment added to list
+- **Error State** → Error messages for validation and network failures
+- **Disabled State** → Form submission disabled when required fields are missing
+
+#### Technical Highlights:
 
 - 🎨 **Modern UI** - Clean, professional design matching Figma specs
 - 📱 **Mobile Navigation** - Vaul drawer for smooth mobile menu
@@ -200,7 +212,6 @@ Static shell with dynamic content:
 
 ```typescript
 export const experimental_ppr = true
-
 ;<Suspense fallback={<Loading />}>
   <PaymentsData />
 </Suspense>

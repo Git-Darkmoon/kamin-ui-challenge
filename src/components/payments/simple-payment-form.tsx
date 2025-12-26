@@ -1,80 +1,33 @@
 "use client"
 
 import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  createPaymentSchema,
-  type CreatePaymentFormData,
-} from "@/lib/schemas/payment-schema"
-import {
-  WALLET_OPTIONS,
-  PAYMENT_SCHEME_LABELS,
-} from "@/lib/constants/payment-constants"
-import { formatCurrency, parseAmount } from "@/lib/utils/format"
-import { Select } from "../ui/select"
-import { Input } from "../ui/input"
 import { Button } from "../ui/button"
+import { Input } from "../ui/input"
+import { Select } from "../ui/select"
+import {
+  PAYMENT_SCHEME_LABELS,
+  WALLET_OPTIONS,
+} from "@/lib/constants/payment-constants"
 
-interface PaymentFormProps {
-  onSubmit: (data: CreatePaymentFormData) => void
+interface SimplePaymentFormProps {
+  action: (formData: FormData) => void
   isPending: boolean
   errors?: Record<string, string[]>
-  formRef?: React.RefObject<HTMLFormElement | null>
   onCancel?: () => void
-  serverAction?: (formData: FormData) => Promise<void>
 }
 
-export function PaymentForm({
-  onSubmit,
+export function SimplePaymentForm({
+  action,
   isPending,
-  errors: serverErrors,
-  formRef,
+  errors,
   onCancel,
-  serverAction,
-}: Readonly<PaymentFormProps>) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-  } = useForm<CreatePaymentFormData>({
-    resolver: zodResolver(createPaymentSchema),
-    defaultValues: {
-      scheme: "limit",
-      wallet: "provedores-pay",
-    },
-  })
-
-  const amountValue = watch("amount")
-  const handleValue = watch("handle")
-
-  // Format amount input
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    const numericValue = parseAmount(value)
-    setValue("amount", numericValue)
-  }
-
-  // Validate handle in real-time
-  const isHandleValid = React.useMemo(() => {
-    if (!handleValue) return true
-    const pattern = /^[a-zA-Z0-9-_]+$/
-    return pattern.exec(handleValue) !== null
-  }, [handleValue])
-
-  const getError = (field: keyof CreatePaymentFormData) => {
-    return errors[field]?.message || serverErrors?.[field]?.[0]
+}: Readonly<SimplePaymentFormProps>) {
+  const getError = (field: string) => {
+    return errors?.[field]?.[0]
   }
 
   return (
-    <form
-      ref={formRef}
-      className="space-y-4"
-      action={serverAction}
-      onSubmit={serverAction ? undefined : handleSubmit(onSubmit)}
-    >
+    <form action={action} className="space-y-4">
       {/* Scheme Selection */}
       <div className="space-y-2">
         <label htmlFor="scheme" className="text-sm font-medium text-slate-700">
@@ -82,7 +35,8 @@ export function PaymentForm({
         </label>
         <Select
           id="scheme"
-          {...register("scheme")}
+          name="scheme"
+          defaultValue="limit"
           error={!!getError("scheme")}
           disabled={isPending}
         >
@@ -104,19 +58,14 @@ export function PaymentForm({
         </label>
         <Input
           id="handle"
-          {...register("handle")}
+          name="handle"
           placeholder="Escribe el handle aquí"
           error={!!getError("handle")}
           disabled={isPending}
+          required
         />
         {getError("handle") && (
           <p className="text-xs text-red-600">{getError("handle")}</p>
-        )}
-        {!getError("handle") && handleValue && !isHandleValid && (
-          <p className="text-xs text-red-600">
-            Este handle no existe o está deshabilitado. Verifica la información
-            nuevamente.
-          </p>
         )}
       </div>
 
@@ -127,20 +76,17 @@ export function PaymentForm({
         </label>
         <Input
           id="amount"
-          type="text"
-          {...register("amount", { valueAsNumber: true })}
-          placeholder="$0.00"
+          name="amount"
+          type="number"
+          placeholder="50000"
           error={!!getError("amount")}
           disabled={isPending}
-          onChange={handleAmountChange}
+          required
+          min="1"
+          step="1"
         />
         {getError("amount") && (
           <p className="text-xs text-red-600">{getError("amount")}</p>
-        )}
-        {!!amountValue && !getError("amount") && (
-          <p className="text-xs text-slate-600">
-            {formatCurrency(amountValue)}
-          </p>
         )}
       </div>
 
@@ -151,7 +97,8 @@ export function PaymentForm({
         </label>
         <Select
           id="wallet"
-          {...register("wallet")}
+          name="wallet"
+          defaultValue="provedores-pay"
           error={!!getError("wallet")}
           disabled={isPending}
         >
@@ -196,11 +143,7 @@ export function PaymentForm({
         >
           Cancelar
         </Button>
-        <Button
-          type="submit"
-          isLoading={isPending}
-          disabled={isPending || !isHandleValid}
-        >
+        <Button type="submit" isLoading={isPending} disabled={isPending}>
           {isPending ? "Creando..." : "Crear interacción"}
         </Button>
       </div>

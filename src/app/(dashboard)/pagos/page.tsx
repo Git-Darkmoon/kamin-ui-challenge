@@ -1,10 +1,7 @@
 import { Suspense } from "react"
 import { PaymentsList } from "@/components/payments/payments-list"
 import { Skeleton } from "@/components/ui/skeleton"
-import { paymentRepository } from "@/data/mock-payments"
-
-// Enable Partial Pre-Rendering
-export const experimental_ppr = true
+import { paymentRepository } from "@/data/persistent-payments"
 
 async function PaymentsData() {
   const [payments, stats] = await Promise.all([

@@ -1,12 +1,8 @@
-// ============================================================================
-// src/lib/actions/payment-actions.ts
-// ============================================================================
-
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { createPaymentSchema } from "@/lib/schemas/payment-schema"
-import { paymentRepository } from "@/data/mock-payments"
+import { paymentRepository } from "@/data/persistent-payments"
 import type { ActionState } from "@/types/api"
 import type { Payment } from "@/types/payment"
 

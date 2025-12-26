@@ -21,6 +21,10 @@ export function formatRelativeDate(date: Date): string {
   return formatDistanceToNow(date, { locale: es, addSuffix: true })
 }
 
-export function formatShortDate(date: Date): string {
-  return format(date, "MMM dd, yyyy", { locale: es })
+export function formatShortDate(date: Date | string): string {
+  const dateObj = typeof date === "string" ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) {
+    return "Invalid Date"
+  }
+  return format(dateObj, "MMM dd, yyyy", { locale: es })
 }

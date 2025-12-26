@@ -3,7 +3,6 @@
 import * as React from "react"
 import { useActionState } from "react"
 import { toast } from "sonner"
-import type { CreatePaymentFormData } from "@/lib/schemas/payment-schema"
 import type { ActionState } from "@/types/api"
 import type { Payment } from "@/types/payment"
 import {
@@ -13,24 +12,24 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
-import { PaymentForm } from "./payment-form"
+import { SimplePaymentForm } from "./simple-payment-form"
 import { createPaymentAction } from "@/lib/actions/payment-actions"
 
 interface CreatePaymentModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onPaymentCreated?: (payment: Payment) => void
 }
 
 export function CreatePaymentModal({
   open,
   onOpenChange,
+  onPaymentCreated,
 }: Readonly<CreatePaymentModalProps>) {
   const [state, formAction, isPending] = useActionState<
     ActionState<Payment> | null,
     FormData
   >(createPaymentAction, null)
-
-  const formRef = React.useRef<HTMLFormElement>(null)
 
   // Handle successful payment creation
   React.useEffect(() => {
@@ -38,21 +37,17 @@ export function CreatePaymentModal({
       toast.success(state.message, {
         description: "Encuentra tu pago en la tabla",
       })
+
+      // Call the callback with the new payment if provided
+      if (onPaymentCreated && state.data) {
+        onPaymentCreated(state.data)
+      }
+
       onOpenChange(false)
-      formRef.current?.reset()
     } else if (state?.success === false && state.message) {
       toast.error(state.message)
     }
-  }, [state, onOpenChange])
-
-  const handleFormSubmit = (data: CreatePaymentFormData) => {
-    const formData = new FormData()
-    formData.append("scheme", data.scheme)
-    formData.append("handle", data.handle)
-    formData.append("amount", data.amount.toString())
-    formData.append("wallet", data.wallet)
-    formAction(formData)
-  }
+  }, [state, onOpenChange, onPaymentCreated])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -63,13 +58,12 @@ export function CreatePaymentModal({
             Completa los datos para continuar
           </DialogDescription>
         </DialogHeader>
-        <form ref={formRef}>
-          <PaymentForm
-            onSubmit={handleFormSubmit}
-            isPending={isPending}
-            errors={state?.errors}
-          />
-        </form>
+        <SimplePaymentForm
+          action={formAction}
+          isPending={isPending}
+          errors={state?.errors}
+          onCancel={() => onOpenChange(false)}
+        />
       </DialogContent>
     </Dialog>
   )

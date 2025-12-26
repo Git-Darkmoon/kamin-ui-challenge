@@ -95,11 +95,11 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-slate-50 border-r border-slate-200">
       {/* Logo */}
-      <div className="flex items-center gap-2 px-6 py-5 border-b border-slate-200">
+      <div className="flex items-center gap-2 px-6 py-5 border-b text-slate-700 border-slate-200">
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none">
           <path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z" fill="currentColor" />
         </svg>
-        <span className="text-lg font-semibold">Tu Empresa</span>
+        <span className="text-3xl font-semibold ">Kamin</span>
       </div>
 
       {/* Navigation */}
