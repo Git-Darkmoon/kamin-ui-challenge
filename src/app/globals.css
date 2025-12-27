@@ -1,1 +1,96 @@
 @import "tailwindcss";
+
+@theme {
+  /* Primary Color Palette  */
+  --color-primary: oklch(32.122% 0.0422 210.019);
+
+  --color-primary-50: oklch(97% 0.008 210.019);
+  --color-primary-100: oklch(94% 0.012 210.019);
+  --color-primary-200: oklch(88% 0.018 210.019);
+  --color-primary-300: oklch(82% 0.025 210.019);
+  --color-primary-400: oklch(74% 0.032 210.019);
+  --color-primary-500: oklch(65% 0.038 210.019);
+  --color-primary-600: oklch(54% 0.042 210.019);
+  --color-primary-700: oklch(42% 0.042 210.019);
+  --color-primary-800: oklch(32.122% 0.0422 210.019);
+  --color-primary-900: oklch(24% 0.038 210.019);
+  --color-primary-950: oklch(16% 0.032 210.019);
+
+  /* Neutral Gray Palette - Slightly tinted with primary hue */
+  --color-neutral-50: oklch(98% 0.003 210.019);
+  --color-neutral-100: oklch(95% 0.005 210.019);
+  --color-neutral-200: oklch(90% 0.008 210.019);
+  --color-neutral-300: oklch(83% 0.012 210.019);
+  --color-neutral-400: oklch(68% 0.015 210.019);
+  --color-neutral-500: oklch(53% 0.018 210.019);
+  --color-neutral-600: oklch(43% 0.02 210.019);
+  --color-neutral-700: oklch(35% 0.022 210.019);
+  --color-neutral-800: oklch(27% 0.024 210.019);
+  --color-neutral-900: oklch(19% 0.026 210.019);
+  --color-neutral-950: oklch(12% 0.028 210.019);
+
+  --font-family-sans: var(--font-inter), system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-abyssinica: var(--font-abyssinica), serif;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-neutral-100);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-400);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-300) var(--color-neutral-100);
+}
+
+/* Custom horizontal scroll for payment cards */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: var(--color-neutral-100);
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-300);
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-400);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visible styling for better accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline and use our custom one */
+*:focus:not(:focus-visible) {
+  outline: none;
+}

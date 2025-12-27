@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { CreatePaymentModal } from "./create-payment-modal"
 import type { Payment, PaymentStats } from "@/types/payment"
 import { Button } from "../ui/button"
@@ -8,6 +7,7 @@ import { PaymentStatsComponent } from "./payment-stats"
 import { PaymentFilters } from "./payment-filters"
 import { PaymentsTable } from "./enhanced-payments-table"
 import { formatShortDate } from "@/lib/utils/date"
+import { useEffect, useMemo, useState } from "react"
 
 interface PaymentsListProps {
   initialPayments: Payment[]
@@ -21,16 +21,16 @@ export function PaymentsList({
   initialPayments,
   stats,
 }: Readonly<PaymentsListProps>) {
-  const [isModalOpen, setIsModalOpen] = React.useState(false)
-  const [searchQuery, setSearchQuery] = React.useState("")
-  const [payments, setPayments] = React.useState(initialPayments)
-  const [currentPage, setCurrentPage] = React.useState(1)
-  const [sortField, setSortField] = React.useState<SortField | null>(null)
-  const [sortOrder, setSortOrder] = React.useState<SortOrder>("default")
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [payments, setPayments] = useState(initialPayments)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [sortField, setSortField] = useState<SortField | null>(null)
+  const [sortOrder, setSortOrder] = useState<SortOrder>("default")
   const itemsPerPage = 6
 
   // Calculate dynamic date range from payments
-  const dateRange = React.useMemo(() => {
+  const dateRange = useMemo(() => {
     if (payments.length === 0) return "No hay pagos"
 
     const dates = payments.map((p) => new Date(p.createdAt))
@@ -41,7 +41,7 @@ export function PaymentsList({
   }, [payments])
 
   // Sort all payments before filtering and pagination
-  const sortedPayments = React.useMemo(() => {
+  const sortedPayments = useMemo(() => {
     if (!sortField || sortOrder === "default") {
       return payments
     }
@@ -80,7 +80,7 @@ export function PaymentsList({
   }, [payments, sortField, sortOrder])
 
   // Filter payments based on search query
-  const filteredPayments = React.useMemo(() => {
+  const filteredPayments = useMemo(() => {
     let filtered = sortedPayments
 
     if (searchQuery.trim()) {
@@ -97,7 +97,7 @@ export function PaymentsList({
   }, [payments, searchQuery])
 
   // Paginated payments for current page
-  const paginatedPayments = React.useMemo(() => {
+  const paginatedPayments = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
     return filteredPayments.slice(startIndex, endIndex)
@@ -106,12 +106,12 @@ export function PaymentsList({
   const totalPages = Math.ceil(filteredPayments.length / itemsPerPage)
 
   // Reset to first page when search changes
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1)
   }, [searchQuery])
 
   // Update payments when new one is created
-  React.useEffect(() => {
+  useEffect(() => {
     setPayments(initialPayments)
   }, [initialPayments])
 
@@ -129,14 +129,14 @@ export function PaymentsList({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900">Pagos</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Crear transacción</Button>
+        <h1 className="text-3xl font-semibold text-primary-950">Pagos</h1>
+        <Button className="bg-[#15393F]" onClick={() => setIsModalOpen(true)}>
+          Crear transacción
+        </Button>
       </div>
 
-      {/* Stats */}
       <PaymentStatsComponent stats={stats} />
 
-      {/* Filters */}
       <PaymentFilters onSearchChange={setSearchQuery} dateRange={dateRange} />
 
       {/* Responsive Table View */}

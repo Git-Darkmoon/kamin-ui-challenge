@@ -181,9 +181,9 @@ const INITIAL_PAYMENTS: Payment[] = [
 ]
 
 const INITIAL_STATS: PaymentStats = {
-  balance: 1250000,
+  balance: 23_421_350,
   totalPages: 15,
-  totalPaid: 980000,
+  totalPaid: 6_026_800,
 }
 
 // Initialize in-memory data
@@ -191,9 +191,7 @@ function initializeData() {
   if (paymentsData.length === 0) {
     paymentsData = [...INITIAL_PAYMENTS]
   }
-  if (!statsData) {
-    statsData = { ...INITIAL_STATS }
-  }
+  statsData ??= { ...INITIAL_STATS }
 }
 
 // Generate unique identification for new payments
@@ -202,11 +200,6 @@ function generateUniqueIdentification(): string {
   const timestamp = Date.now()
   const random = Math.random().toString(36).slice(2, 6).toUpperCase()
   return `TX-${year}-${String(timestamp).slice(-3)}-${random}`
-}
-
-// No-op for in-memory storage
-function ensureDataDir() {
-  // Not needed for in-memory storage
 }
 
 // Read payments from in-memory storage

@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { Download, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react"
 import jsPDF from "jspdf"
 import { formatCurrency } from "@/lib/utils/format"
@@ -47,31 +46,53 @@ export function PaymentsTable({
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
-      return <ArrowUpDown className="h-3 w-3 ml-1 text-slate-400" />
+      return <ArrowUpDown className="size-4 ml-1 text-primary-500" />
     }
 
     switch (sortOrder) {
       case "asc":
-        return <ChevronUp className="h-3 w-3 ml-1 text-slate-600" />
+        return <ChevronUp className="size-4 ml-1 text-primary-500" />
       case "desc":
-        return <ChevronDown className="h-3 w-3 ml-1 text-slate-600" />
+        return <ChevronDown className="size-4 ml-1 text-primary-500" />
       default:
-        return <ArrowUpDown className="h-3 w-3 ml-1 text-slate-400" />
+        return <ArrowUpDown className="size-4 ml-1 text-primary-500" />
     }
   }
 
   const downloadInvoicePDF = (payment: Payment) => {
     const doc = new jsPDF()
 
-    // Define color palette
+    // Define color palette based on CSS theme
     const colors = {
-      primary: "#1e40af", // Blue-700
-      secondary: "#64748b", // Slate-500
-      accent: "#0f172a", // Slate-900
-      light: "#f8fafc", // Slate-50
-      success: "#059669", // Emerald-600
-      warning: "#d97706", // Amber-600
-      danger: "#dc2626", // Red-600
+      // Primary palette
+      primary: "#1a3a41", // Approximate hex for oklch(32.122% 0.0422 210.019)
+      primary50: "#f7f9fa",
+      primary100: "#eff3f4",
+      primary200: "#dae6e9",
+      primary300: "#c5d9de",
+      primary400: "#9cc2cb",
+      primary500: "#6fa7b3",
+      primary600: "#4a8694",
+      primary700: "#376570",
+      primary800: "#1a3a41",
+      primary900: "#142e33",
+      primary950: "#0f2328",
+      // Neutrals
+      neutral50: "#f9fafa",
+      neutral100: "#f3f4f4",
+      neutral200: "#e7e8e9",
+      neutral300: "#d4d6d7",
+      neutral400: "#a8acae",
+      neutral500: "#7c8285",
+      neutral600: "#64696c",
+      neutral700: "#515659",
+      neutral800: "#3e4245",
+      neutral900: "#2b2f32",
+      neutral950: "#1d2125",
+      // Status colors
+      success: "#059669",
+      warning: "#d97706",
+      danger: "#dc2626",
     }
 
     // Helper function to convert hex to RGB
@@ -93,18 +114,34 @@ export function PaymentsTable({
 
     // === HEADER SECTION ===
     // Header background
-    const headerColor = hexToRgb(colors.primary)
+    const headerColor = hexToRgb(colors.primary800)
     if (headerColor) {
       doc.setFillColor(headerColor.r, headerColor.g, headerColor.b)
       doc.rect(0, 0, pageWidth, 45, "F")
     }
 
-    // Company logo area (placeholder)
+    // Company logo - Load SVG logo
+    const logoUrl = "/logomark.png"
+    // Create a white background circle for logo visibility
     doc.setFillColor(255, 255, 255)
-    doc.rect(margin, 12, 25, 20, "F")
-    doc.setFontSize(8)
-    doc.setTextColor(150, 150, 150)
-    doc.text("LOGO", margin + 10, 23)
+    doc.circle(margin + 12.5, 22, 10, "F")
+
+    // Logo container with subtle border
+    const logoContainerColor = hexToRgb(colors.primary600)
+    if (logoContainerColor) {
+      doc.setDrawColor(
+        logoContainerColor.r,
+        logoContainerColor.g,
+        logoContainerColor.b
+      )
+      doc.setLineWidth(0.5)
+      doc.circle(margin + 12.5, 22, 10, "S")
+    }
+
+    // Center the logo within the circle (15x15 logo centered in 20x20 circle)
+    doc.setFontSize(7)
+    doc.setTextColor(100, 100, 100)
+    doc.addImage(logoUrl, "PNG", margin + 5, 14.5, 15, 15)
 
     // Company name and tagline
     doc.setFontSize(24)
@@ -134,41 +171,88 @@ export function PaymentsTable({
     let currentY = 60
 
     // Company details box
-    doc.setFillColor(248, 250, 252) // Light background
+    const companyBgColor = hexToRgb(colors.primary50)
+    if (companyBgColor) {
+      doc.setFillColor(companyBgColor.r, companyBgColor.g, companyBgColor.b)
+    }
     doc.rect(margin, currentY, 85, 35, "F")
-    doc.setDrawColor(200, 200, 200)
+    const companyBorderColor = hexToRgb(colors.primary200)
+    if (companyBorderColor) {
+      doc.setDrawColor(
+        companyBorderColor.r,
+        companyBorderColor.g,
+        companyBorderColor.b
+      )
+    }
     doc.rect(margin, currentY, 85, 35, "S")
 
     doc.setFontSize(12)
     doc.setFont("helvetica", "bold")
-    doc.setTextColor(30, 64, 175) // Primary color for headers
+    const companyNameColor = hexToRgb(colors.primary700)
+    if (companyNameColor) {
+      doc.setTextColor(
+        companyNameColor.r,
+        companyNameColor.g,
+        companyNameColor.b
+      )
+    }
     doc.text("KAMIN STUDIO", margin + 5, currentY + 8)
 
     doc.setFontSize(9)
     doc.setFont("helvetica", "normal")
-    doc.setTextColor(100, 116, 139) // Secondary color
+    const companyTextColor = hexToRgb(colors.neutral600)
+    if (companyTextColor) {
+      doc.setTextColor(
+        companyTextColor.r,
+        companyTextColor.g,
+        companyTextColor.b
+      )
+    }
     doc.text("Plataforma de Pagos Corporativa", margin + 5, currentY + 15)
     doc.text("Email: payment.platform@kamin.studio", margin + 5, currentY + 22)
     doc.text("Tel: +57 (1) 234-5678", margin + 5, currentY + 29)
 
     // Client details box
-    doc.setFillColor(248, 250, 252)
+    const clientBgColor = hexToRgb(colors.primary50)
+    if (clientBgColor) {
+      doc.setFillColor(clientBgColor.r, clientBgColor.g, clientBgColor.b)
+    }
     doc.rect(pageWidth - margin - 85, currentY, 85, 35, "F")
-    doc.setDrawColor(200, 200, 200)
+    const clientBorderColor = hexToRgb(colors.primary200)
+    if (clientBorderColor) {
+      doc.setDrawColor(
+        clientBorderColor.r,
+        clientBorderColor.g,
+        clientBorderColor.b
+      )
+    }
     doc.rect(pageWidth - margin - 85, currentY, 85, 35, "S")
 
     doc.setFontSize(12)
     doc.setFont("helvetica", "bold")
-    doc.setTextColor(30, 64, 175)
+    const clientHeaderColor = hexToRgb(colors.primary700)
+    if (clientHeaderColor) {
+      doc.setTextColor(
+        clientHeaderColor.r,
+        clientHeaderColor.g,
+        clientHeaderColor.b
+      )
+    }
     doc.text("DESTINATARIO", pageWidth - margin - 80, currentY + 8)
 
     doc.setFontSize(10)
     doc.setFont("helvetica", "normal")
-    doc.setTextColor(15, 23, 42) // Accent color
+    const clientNameColor = hexToRgb(colors.neutral800)
+    if (clientNameColor) {
+      doc.setTextColor(clientNameColor.r, clientNameColor.g, clientNameColor.b)
+    }
     doc.text(payment.recipient, pageWidth - margin - 80, currentY + 18)
 
     doc.setFontSize(9)
-    doc.setTextColor(100, 116, 139)
+    const clientDateColor = hexToRgb(colors.neutral600)
+    if (clientDateColor) {
+      doc.setTextColor(clientDateColor.r, clientDateColor.g, clientDateColor.b)
+    }
     doc.text(
       `Fecha: ${formatShortDate(payment.createdAt)}`,
       pageWidth - margin - 80,
@@ -179,7 +263,14 @@ export function PaymentsTable({
 
     // === PAYMENT DETAILS SECTION ===
     // Section header
-    doc.setFillColor(30, 64, 175)
+    const sectionHeaderColor = hexToRgb(colors.primary700)
+    if (sectionHeaderColor) {
+      doc.setFillColor(
+        sectionHeaderColor.r,
+        sectionHeaderColor.g,
+        sectionHeaderColor.b
+      )
+    }
     doc.rect(margin, currentY, pageWidth - 2 * margin, 12, "F")
 
     doc.setFontSize(12)
@@ -215,25 +306,37 @@ export function PaymentsTable({
 
       // Alternate row background
       if (isEvenRow) {
-        doc.setFillColor(248, 250, 252)
+        const rowBgColor = hexToRgb(colors.neutral50)
+        if (rowBgColor) {
+          doc.setFillColor(rowBgColor.r, rowBgColor.g, rowBgColor.b)
+        }
         doc.rect(margin, y - 2, pageWidth - 2 * margin, rowHeight, "F")
       }
 
       // Label
       doc.setFontSize(9)
       doc.setFont("helvetica", "bold")
-      doc.setTextColor(100, 116, 139)
+      const labelColor = hexToRgb(colors.neutral600)
+      if (labelColor) {
+        doc.setTextColor(labelColor.r, labelColor.g, labelColor.b)
+      }
       doc.text(row.label + ":", margin + 5, y + 6)
 
       // Value
       doc.setFont("helvetica", "normal")
-      doc.setTextColor(15, 23, 42)
+      const valueColor = hexToRgb(colors.neutral800)
+      if (valueColor) {
+        doc.setTextColor(valueColor.r, valueColor.g, valueColor.b)
+      }
 
       // Special styling for amount
       if (row.label === "Monto") {
         doc.setFontSize(11)
         doc.setFont("helvetica", "bold")
-        doc.setTextColor(5, 150, 105) // Success color for amount
+        const amountColor = hexToRgb(colors.success)
+        if (amountColor) {
+          doc.setTextColor(amountColor.r, amountColor.g, amountColor.b)
+        }
       }
 
       // Special styling for status
@@ -258,14 +361,20 @@ export function PaymentsTable({
       // Reset formatting
       doc.setFontSize(9)
       doc.setFont("helvetica", "normal")
-      doc.setTextColor(15, 23, 42)
+      const resetColor = hexToRgb(colors.neutral800)
+      if (resetColor) {
+        doc.setTextColor(resetColor.r, resetColor.g, resetColor.b)
+      }
     })
 
     currentY += tableData.length * rowHeight + 25
 
     // === AMOUNT SUMMARY BOX ===
     // Summary box
-    doc.setFillColor(5, 150, 105) // Success color
+    const summaryColor = hexToRgb(colors.success)
+    if (summaryColor) {
+      doc.setFillColor(summaryColor.r, summaryColor.g, summaryColor.b)
+    }
     doc.rect(pageWidth - margin - 80, currentY, 80, 25, "F")
 
     doc.setFontSize(10)
@@ -285,13 +394,19 @@ export function PaymentsTable({
     const footerY = pageHeight - 40
 
     // Footer line
-    doc.setDrawColor(200, 200, 200)
+    const footerLineColor = hexToRgb(colors.primary200)
+    if (footerLineColor) {
+      doc.setDrawColor(footerLineColor.r, footerLineColor.g, footerLineColor.b)
+    }
     doc.line(margin, footerY, pageWidth - margin, footerY)
 
     // Footer content
     doc.setFontSize(8)
     doc.setFont("helvetica", "normal")
-    doc.setTextColor(100, 116, 139)
+    const footerTextColor = hexToRgb(colors.neutral600)
+    if (footerTextColor) {
+      doc.setTextColor(footerTextColor.r, footerTextColor.g, footerTextColor.b)
+    }
 
     const footerText = [
       "Este documento ha sido generado automáticamente por el sistema de KAMIN STUDIO.",
@@ -307,7 +422,10 @@ export function PaymentsTable({
 
     // Security watermark
     doc.setFontSize(6)
-    doc.setTextColor(200, 200, 200)
+    const watermarkColor = hexToRgb(colors.neutral300)
+    if (watermarkColor) {
+      doc.setTextColor(watermarkColor.r, watermarkColor.g, watermarkColor.b)
+    }
     doc.text(
       "DOCUMENTO OFICIAL - KAMIN STUDIO PAYMENT PLATFORM",
       pageWidth - margin - 60,
@@ -315,10 +433,16 @@ export function PaymentsTable({
     )
 
     // QR Code placeholder (future enhancement)
-    doc.setDrawColor(200, 200, 200)
+    const qrColor = hexToRgb(colors.primary300)
+    if (qrColor) {
+      doc.setDrawColor(qrColor.r, qrColor.g, qrColor.b)
+    }
     doc.rect(pageWidth - margin - 20, footerY + 5, 15, 15, "S")
     doc.setFontSize(6)
-    doc.setTextColor(150, 150, 150)
+    const qrTextColor = hexToRgb(colors.primary400)
+    if (qrTextColor) {
+      doc.setTextColor(qrTextColor.r, qrTextColor.g, qrTextColor.b)
+    }
     doc.text("QR", pageWidth - margin - 14, footerY + 13)
 
     // Download the professionally styled PDF
@@ -327,86 +451,86 @@ export function PaymentsTable({
 
   return (
     <div
-      className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm"
+      className="bg-white rounded-lg border border-primary-200 overflow-hidden shadow-sm"
       data-testid="payments-table"
     >
       {/* Desktop View */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200">
+          <thead className="bg-primary-50 border-b border-primary-200">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider">
                 Identificación
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider">
                 Nombre
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider">
                 <button
                   onClick={() => handleSort("orderAmount")}
-                  className="flex items-center hover:text-slate-900 transition-colors"
+                  className="flex items-center hover:text-primary-900 transition-colors min-w-0"
                 >
-                  Order Amount
-                  {getSortIcon("orderAmount")}
+                  <span className="shrink-0">Cantidad</span>
+                  <span className="shrink-0 ml-1">
+                    {getSortIcon("orderAmount")}
+                  </span>
                 </button>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider">
                 Estado
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                Esquema
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider">
                 <button
                   onClick={() => handleSort("createdAt")}
-                  className="flex items-center hover:text-slate-900 transition-colors"
+                  className="flex items-center hover:text-primary-900 transition-colors min-w-0"
                 >
-                  Fecha de Creación
-                  {getSortIcon("createdAt")}
+                  <span className="wrap-break-word">Fecha de Creación</span>
+                  <span className="shrink-0 ml-1">
+                    {getSortIcon("createdAt")}
+                  </span>
                 </button>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider">
                 <button
                   onClick={() => handleSort("completedAt")}
-                  className="flex items-center hover:text-slate-900 transition-colors"
+                  className="flex items-center hover:text-primary-900 transition-colors min-w-0"
                 >
-                  Fecha de Finalización
-                  {getSortIcon("completedAt")}
+                  <span className="wrap-break-word">Fecha de Finalización</span>
+                  <span className="shrink-0 ml-1">
+                    {getSortIcon("completedAt")}
+                  </span>
                 </button>
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">
-                Acciones
-              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-primary-600 uppercase tracking-wider"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-white">
+          <tbody className="divide-y divide-primary-200 bg-white">
             {payments.map((payment) => (
               <tr
                 key={payment.id}
                 data-testid="payment-row"
-                className="hover:bg-slate-50 transition-colors"
+                className="hover:bg-primary-50 transition-colors"
               >
-                <td className="px-6 py-4 text-sm font-mono text-slate-700">
+                <td className="px-6 py-4 text-sm font-family-sans font-semibold text-primary-700">
                   {payment.identification}
                 </td>
-                <td className="px-6 py-4 text-sm text-slate-900">
+                <td className="px-6 py-4 text-sm text-primary-900">
                   {payment.recipient}
                 </td>
-                <td className="px-6 py-4 text-sm font-semibold text-slate-900">
+                <td className="px-6 py-4 text-sm font-medium tracking-tighter text-primary-600">
                   {formatCurrency(payment.orderAmount, payment.currency)}
+                  &nbsp;COP
                 </td>
                 <td className="px-6 py-4">
                   <Badge variant={getStatusVariant(payment.status)}>
                     {PAYMENT_STATUS_LABELS[payment.status]}
                   </Badge>
                 </td>
-                <td className="px-6 py-4 text-sm text-slate-600">
-                  {payment.scheme}
-                </td>
-                <td className="px-6 py-4 text-sm text-slate-600">
+
+                <td className="px-6 py-4 text-sm text-primary-600">
                   {formatShortDate(payment.createdAt)}
                 </td>
-                <td className="px-6 py-4 text-sm text-slate-600">
+                <td className="px-6 py-4 text-sm text-primary-600">
                   {formatShortDate(payment.completedAt)}
                 </td>
                 <td className="px-6 py-4 text-right">
@@ -414,7 +538,7 @@ export function PaymentsTable({
                     variant="ghost"
                     size="sm"
                     onClick={() => downloadInvoicePDF(payment)}
-                    className="text-slate-600 hover:text-slate-900"
+                    className="text-primary-600 hover:text-primary-900"
                     data-testid="download-button"
                   >
                     <Download className="h-4 w-4" />
@@ -428,41 +552,41 @@ export function PaymentsTable({
 
       {/* Mobile View */}
       <div className="md:hidden">
-        <div className="border-b border-slate-200 bg-slate-50">
+        <div className="border-b border-primary-200 bg-primary-50">
           <div className="px-4 py-3">
-            <h3 className="text-sm font-medium text-slate-900">
+            <h3 className="text-sm font-medium text-primary-900">
               Lista de Pagos
             </h3>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-xs text-primary-600 mt-1">
               {payments.length} {payments.length === 1 ? "pago" : "pagos"}
             </p>
           </div>
         </div>
         <table className="w-full">
-          <thead className="border-b border-slate-200 bg-slate-50">
+          <thead className="border-b border-primary-200 bg-primary-50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider">
                 Nombre
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium text-primary-600 uppercase tracking-wider">
                 Total transacciones
               </th>
               <th className="px-4 py-3 w-10"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-white">
+          <tbody className="divide-y divide-primary-200 bg-white">
             {payments.map((payment) => (
               <tr
                 key={payment.id}
                 data-testid="payment-row-mobile"
-                className="hover:bg-slate-50 transition-colors"
+                className="hover:bg-primary-50 transition-colors"
               >
                 <td className="px-4 py-4 text-sm">
                   <div>
-                    <div className="font-medium text-slate-900">
+                    <div className="font-medium text-primary-900">
                       {payment.recipient}
                     </div>
-                    <div className="text-xs text-slate-500 mt-1">
+                    <div className="text-xs text-primary-500 mt-1">
                       {payment.identification}
                     </div>
                     <div className="mt-1">
@@ -476,10 +600,10 @@ export function PaymentsTable({
                   </div>
                 </td>
                 <td className="px-4 py-4 text-right text-sm">
-                  <div className="font-medium text-slate-900">
+                  <div className="font-medium text-primary-900">
                     {formatCurrency(payment.orderAmount, payment.currency)}
                   </div>
-                  <div className="text-xs text-slate-500 mt-1">
+                  <div className="text-xs text-primary-500 mt-1">
                     {formatShortDate(payment.createdAt)}
                   </div>
                 </td>
@@ -488,7 +612,7 @@ export function PaymentsTable({
                     variant="ghost"
                     size="sm"
                     onClick={() => downloadInvoicePDF(payment)}
-                    className="text-slate-600 hover:text-slate-900 p-1 h-8 w-8"
+                    className="text-primary-600 hover:text-primary-900 p-1 h-8 w-8"
                     data-testid="download-button"
                   >
                     <Download className="h-4 w-4" />
@@ -503,7 +627,7 @@ export function PaymentsTable({
       {/* Empty State */}
       {payments.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-slate-400 text-sm">
+          <div className="text-primary-400 text-sm">
             No hay pagos para mostrar
           </div>
         </div>

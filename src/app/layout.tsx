@@ -1,20 +1,26 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Inter } from "next/font/google"
+import localFont from "next/font/local"
 import "./globals.css"
 import { Toaster } from "sonner"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 })
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const abyssinicaSil = localFont({
+  src: [
+    {
+      path: "../fonts/AbyssinicaSIL-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-abyssinica",
   display: "swap",
-  weight: ["400", "500", "600"],
 })
 
 export const metadata: Metadata = {
@@ -43,7 +49,7 @@ export const metadata: Metadata = {
   authors: [
     {
       name: "Nicolas Mayorga",
-      url: "https://github.com/nicolasmayorga",
+      url: "https://github.com/Git-Darkmoon",
     },
   ],
   creator: "Kamin",
@@ -52,25 +58,24 @@ export const metadata: Metadata = {
   category: "Finance",
   classification: "Payment Management",
 
-  // Open Graph metadata for social sharing
   openGraph: {
     type: "website",
-    locale: "en_US",
-    url: "https://studio.kamin.com", // Internal Kamin domain
+    locale: "es_CO",
+    url: "https://kamin-ui-challenge.vercel.app",
     siteName: "Kamin Studio",
     title: "Kamin Studio - Payment Management Platform",
     description:
       "Kamin's internal platform for managing payments, transactions, and operational flows with real-time processing and comprehensive monitoring.",
     images: [
       {
-        url: "/og-image.png", // Kamin Studio OG image
+        url: "/og-kamin.png",
         width: 1200,
         height: 630,
         alt: "Kamin Studio - Payment Management Dashboard",
         type: "image/png",
       },
       {
-        url: "/og-image-square.png", // Square version for some platforms
+        url: "/og-kamin.png",
         width: 1200,
         height: 1200,
         alt: "Kamin Studio Logo",
@@ -79,18 +84,16 @@ export const metadata: Metadata = {
     ],
   },
 
-  // Twitter Card metadata
   twitter: {
     card: "summary_large_image",
-    site: "@kamin_tech", // Kamin's Twitter handle
+    site: "@kamin_tech",
     creator: "@nicolasmayorga",
     title: "Kamin Studio - Payment Management Platform",
     description:
       "Internal platform for managing payments, transactions, and operational flows with real-time processing capabilities.",
-    images: ["/og-image.png"],
+    images: ["/og-kamin.png"],
   },
 
-  // Additional metadata
   robots: {
     index: true,
     follow: true,
@@ -103,7 +106,6 @@ export const metadata: Metadata = {
     },
   },
 
-  // App-specific metadata
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -121,22 +123,20 @@ export const metadata: Metadata = {
     ],
   },
 
-  // Other metadata
   formatDetection: {
     telephone: false,
     email: false,
     address: false,
   },
 
-  // App metadata for mobile
   other: {
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
     "apple-mobile-web-app-title": "Kamin Studio",
     "mobile-web-app-capable": "yes",
-    "msapplication-TileColor": "#0ea5e9",
+    "msapplication-TileColor": "#15393f",
     "msapplication-config": "/browserconfig.xml",
-    "theme-color": "#0ea5e9",
+    "theme-color": "#15393f",
   },
 }
 
@@ -147,7 +147,6 @@ export const viewport: Viewport = {
   userScalable: true,
 }
 
-// Structured data for SEO
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -155,7 +154,7 @@ const structuredData = {
   applicationCategory: "FinanceApplication",
   description:
     "Internal platform for managing payments, transactions, and operational flows",
-  url: "https://studio.kamin.com", // Internal Kamin domain
+  url: "https://kamin-ui-challenge.vercel.app",
   operatingSystem: "Web Browser",
   offers: {
     "@type": "Offer",
@@ -187,15 +186,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className="dark" suppressHydrationWarning>
+    <html
+      lang="es"
+      className={`${inter.variable} ${abyssinicaSil.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        {/* Structured Data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
 
-        {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -203,18 +204,12 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
 
-        {/* Favicon and app icons */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/logomark.svg" type="image/svg+xml" />
 
-        {/* Manifest for PWA */}
         <link rel="manifest" href="/manifest.json" />
 
-        {/* DNS prefetch for better performance */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
 
-        {/* Security headers */}
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta
           httpEquiv="Referrer-Policy"
@@ -222,10 +217,9 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-slate-100 text-foreground selection:bg-emerald-700/20 selection:text-slate-800`}
+        className="font-sans antialiased bg-slate-100 text-foreground selection:bg-emerald-700/20 selection:text-slate-800"
         suppressHydrationWarning
       >
-        {/* Skip to main content for accessibility */}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-emerald-500 focus:text-background focus:rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-600"
@@ -233,8 +227,7 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        {/* Main application */}
-        <main id="main-content" className="min-h-screen py-4">
+        <main id="main-content" className="min-h-screen">
           {children}
           <Toaster position="bottom-right" />
         </main>
