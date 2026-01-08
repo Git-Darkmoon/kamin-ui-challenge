@@ -2,6 +2,8 @@
 
 A modern, scalable payment management platform built with Next.js 16, TypeScript, and TailwindCSS for Kamin Studio's technical interview challenge.
 
+<img width="1920" height="1080" alt="mobile-view-kamin" src="https://github.com/user-attachments/assets/2af21e8d-436a-4888-a359-1c71345d4f36" />
+
 ## 🚀 Features
 
 ### Core Functionality
