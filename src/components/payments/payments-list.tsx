@@ -6,8 +6,7 @@ import { Button } from "../ui/button"
 import { PaymentStatsComponent } from "./payment-stats"
 import { PaymentFilters } from "./payment-filters"
 import { PaymentsTable } from "./enhanced-payments-table"
-import { formatShortDate } from "@/lib/utils/date"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useCallback } from "react"
 
 interface PaymentsListProps {
   initialPayments: Payment[]
@@ -19,29 +18,28 @@ type SortOrder = "asc" | "desc" | "default"
 
 export function PaymentsList({
   initialPayments,
-  stats,
+  stats: initialStats,
 }: Readonly<PaymentsListProps>) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [payments, setPayments] = useState(initialPayments)
+  const [payments, setPayments] = useState(
+    Array.isArray(initialPayments) ? initialPayments : []
+  )
+  const [stats, setStats] = useState(initialStats)
+  const [isLoading, setIsLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [sortField, setSortField] = useState<SortField | null>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>("default")
+  const [dateFrom, setDateFrom] = useState<Date | undefined>()
+  const [dateTo, setDateTo] = useState<Date | undefined>()
   const itemsPerPage = 6
-
-  // Calculate dynamic date range from payments
-  const dateRange = useMemo(() => {
-    if (payments.length === 0) return "No hay pagos"
-
-    const dates = payments.map((p) => new Date(p.createdAt))
-    const minDate = new Date(Math.min(...dates.map((d) => d.getTime())))
-    const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())))
-
-    return `${formatShortDate(minDate)} - ${formatShortDate(maxDate)}`
-  }, [payments])
 
   // Sort all payments before filtering and pagination
   const sortedPayments = useMemo(() => {
+    if (!payments || !Array.isArray(payments)) {
+      return []
+    }
+
     if (!sortField || sortOrder === "default") {
       return payments
     }
@@ -79,13 +77,18 @@ export function PaymentsList({
     })
   }, [payments, sortField, sortOrder])
 
-  // Filter payments based on search query
+  // Filter payments based on search query and date range
   const filteredPayments = useMemo(() => {
+    if (!sortedPayments || !Array.isArray(sortedPayments)) {
+      return []
+    }
+
     let filtered = sortedPayments
 
+    // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
-      filtered = payments.filter(
+      filtered = filtered.filter(
         (payment) =>
           payment.identification.toLowerCase().includes(query) ||
           payment.recipient.toLowerCase().includes(query) ||
@@ -93,31 +96,95 @@ export function PaymentsList({
       )
     }
 
+    // Apply date range filter
+    if (dateFrom || dateTo) {
+      filtered = filtered.filter((payment) => {
+        const paymentDate = new Date(payment.createdAt)
+        const paymentDateOnly = new Date(
+          paymentDate.getFullYear(),
+          paymentDate.getMonth(),
+          paymentDate.getDate()
+        )
+
+        if (dateFrom) {
+          const fromDateOnly = new Date(
+            dateFrom.getFullYear(),
+            dateFrom.getMonth(),
+            dateFrom.getDate()
+          )
+          if (paymentDateOnly < fromDateOnly) return false
+        }
+
+        if (dateTo) {
+          const toDateOnly = new Date(
+            dateTo.getFullYear(),
+            dateTo.getMonth(),
+            dateTo.getDate()
+          )
+          if (paymentDateOnly > toDateOnly) return false
+        }
+
+        return true
+      })
+    }
+
     return filtered
-  }, [payments, searchQuery])
+  }, [sortedPayments, searchQuery, dateFrom, dateTo])
 
   // Paginated payments for current page
   const paginatedPayments = useMemo(() => {
+    if (!filteredPayments || !Array.isArray(filteredPayments)) {
+      return []
+    }
+
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
     return filteredPayments.slice(startIndex, endIndex)
   }, [filteredPayments, currentPage, itemsPerPage])
 
-  const totalPages = Math.ceil(filteredPayments.length / itemsPerPage)
+  const totalPages = Math.ceil((filteredPayments?.length || 0) / itemsPerPage)
 
-  // Reset to first page when search changes
+  // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery])
+  }, [searchQuery, dateFrom, dateTo])
 
-  // Update payments when new one is created
+  // Handle date range filter changes
+  const handleDateRangeChange = (newDateFrom?: Date, newDateTo?: Date) => {
+    setDateFrom(newDateFrom)
+    setDateTo(newDateTo)
+  }
+
+  // Function to fetch fresh data from API
+  const refreshData = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/payments", {
+        cache: "no-store",
+      })
+
+      if (response.ok) {
+        const { data } = await response.json()
+        setPayments(Array.isArray(data?.payments) ? data.payments : [])
+        setStats(data?.stats || { balance: 0, totalPages: 0, totalPaid: 0 })
+      }
+    } catch (error) {
+      console.error("Error refreshing data:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // Update payments when initial data changes
   useEffect(() => {
-    setPayments(initialPayments)
-  }, [initialPayments])
+    setPayments(Array.isArray(initialPayments) ? initialPayments : [])
+    setStats(initialStats || { balance: 0, totalPages: 0, totalPaid: 0 })
+  }, [initialPayments, initialStats])
 
   // Function to handle new payment creation
-  const handlePaymentCreated = (newPayment: Payment) => {
-    setPayments((prev) => [newPayment, ...prev])
+  const handlePaymentCreated = async (newPayment: Payment) => {
+    // Refresh data from API to ensure consistency
+    await refreshData()
     setCurrentPage(1) // Go to first page to show the new payment
   }
 
@@ -137,7 +204,12 @@ export function PaymentsList({
 
       <PaymentStatsComponent stats={stats} />
 
-      <PaymentFilters onSearchChange={setSearchQuery} dateRange={dateRange} />
+      <PaymentFilters
+        onSearchChange={setSearchQuery}
+        onDateRangeChange={handleDateRangeChange}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+      />
 
       {/* Responsive Table View */}
       {paginatedPayments.length > 0 ? (
